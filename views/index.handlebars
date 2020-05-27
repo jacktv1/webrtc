@@ -26,11 +26,14 @@
 <script>
   var firebaseConfig = {
     apiKey: "AIzaSyDdWXsOoKtyndHTJGElfLJvWxTWzFoMZ0Y",
-    authDomain: "myapp-project-123.firebaseapp.com",
-    databaseURL: "https://webrtc-e263a.firebaseio.com/",
+    authDomain: "webrtc-e263a.firebaseapp.com",
+    databaseURL: "https://webrtc-e263a.firebaseio.com",
     projectId: "webrtc-e263a",
+    storageBucket: "webrtc-e263a.appspot.com",
     messagingSenderId: "937625305824",
+    appId: "1:937625305824:web:8854aed95bf3a355fe0685"
   };
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   function loginWithGoogle() {
     var provider = new firebase.auth.GoogleAuthProvider();
@@ -53,6 +56,9 @@
       // The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
       // ...
+
+      console.log(errorMessage);
+      alert(errorMessage);
     });
   }
     
@@ -75,6 +81,10 @@
       // The firebase.auth.AuthCredential type that was used.
       var credential = error.credential;
       // ...
+
+       var errorMessage = error.message;
+        console.log(errorMessage);
+        alert(errorMessage);
     });
   }
 
