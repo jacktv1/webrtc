@@ -1,4 +1,5 @@
 var express = require('express');
+var admin = require('firebase-admin');
 var router = express.Router();
 
 /* GET users listing. */

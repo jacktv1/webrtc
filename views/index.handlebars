@@ -1,4 +1,14 @@
+<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
 <div id="app">
+  <button class="btn-face m-b-10" style="margin: 30;" onclick="loginWithFacebook()">
+					
+						Facebook
+					</button>
+
+					<button class="btn-google m-b-10" onclick="loginWithGoogle()">
+					
+						Google
+					</button>
   <span id="myid"> </span>
   <video id="selfview"></video>
   <video id="remoteview"></video>
@@ -9,9 +19,64 @@
     </ul>
   </div>
 </div>
-
+<script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
+<script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 <script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyDdWXsOoKtyndHTJGElfLJvWxTWzFoMZ0Y",
+    authDomain: "myapp-project-123.firebaseapp.com",
+    databaseURL: "https://webrtc-e263a.firebaseio.com/",
+    projectId: "webrtc-e263a",
+    messagingSenderId: "937625305824",
+  };
+  firebase.initializeApp(firebaseConfig);
+  function loginWithGoogle() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+    provider.setCustomParameters({
+      'login_hint': 'user@example.com'
+    });
+    firebase.auth().signInWithPopup(provider).then(function (result) {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      var token = result.credential.accessToken;
+      // The signed-in user info.
+      var user = result.user;
+      // ...
+    }).catch(function (error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // The email of the user's account used.
+      var email = error.email;
+      // The firebase.auth.AuthCredential type that was used.
+      var credential = error.credential;
+      // ...
+    });
+  }
+    
+  function loginWithFacebook() {
+    var provider = new firebase.auth.FacebookAuthProvider();
+    firebase.auth().signInWithRedirect(provider).then(function(result) {
+      // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+      var token = result.credential.accessToken;
+      // The signed-in user info.
+      var user = result.user;
+      // ...
+    }).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // The email of the user's account used.
+      var email = error.email;
+      // The firebase.auth.AuthCredential type that was used.
+      var credential = error.credential;
+      // ...
+    });
+  }
+
+
     var pusher = new Pusher("b38e18d7edf043da795b", {
       cluster: "ap1",
       //encrypted: true,
