@@ -5,12 +5,12 @@ var firebaseController = require('../controllers/firebase-controller.js');
 
 /* GET home page. */
 router.get('/', async (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect('/login');
-  }
-  let users = await firebaseController.getListAllUsers();
-  console.log(req.session.user.uid);
-  res.render('index', { title: 'Express', user_info: req.session.user, users });
+  // if (!req.session.user) {
+  //   return res.redirect('/login');
+  // }
+  // let users = await firebaseController.getListAllUsers();
+  // console.log(req.session.user.uid);
+  res.render('index', { title: 'Express'});
 });
 
 /* GET home page. */

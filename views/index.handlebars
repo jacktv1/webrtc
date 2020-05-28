@@ -1,350 +1,102 @@
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
-<link rel="stylesheet" href="/home-style.css">
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
-	<div class="container-fluid h-100" id="app">
-			<div class="row justify-content-center h-100">
-				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
-					<div class="card-header">
-						<div class="input-group">
-							<input type="text" placeholder="Search..." name="" class="form-control search">
-							<div class="input-group-prepend">
-								<span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
-							</div>
-						</div>
-					</div>
-					<div class="card-body contacts_body">
-						<ul class="contacts">
-              {{#each users}}
-            {{#ifCond this.uid '!=' ../user_info.uid}}
-                <li class="active" onclick="setName('{{this.displayName}}', '{{this.uid}}')">
-                  <div class="d-flex bd-highlight">
-                    <div class="img_cont">
-                      <img src="{{this.photoURL}}" class="rounded-circle user_img">
-                      <span class="online_icon"></span>
-                    </div>
-                    <div class="user_info">
-                      <span>{{ this.displayName }}</span>
-                      <p>{{ this.email }}</p>
-                    </div>
-                  </div>
-                </li>
-              {{/ifCond}}
-            {{/each}}
-						</ul>
-					</div>
-					<div class="card-footer"></div>
-				</div></div>
-				<div class="col-md-8 col-xl-9 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span id="peer-name"></span>
-									{{!-- <p>1767 Messages</p> --}}
-								</div>
-								<div class="video_cam">
-									<span><i class="fas fa-video" onclick="callUser()"></i></span>
-									<span><i class="fas fa-phone"></i></span>
-								</div>
-							</div>
-							<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
-							<div class="action_menu">
-								<ul>
-									<li><i class="fas fa-user-circle"></i> View profile</li>
-									<li><i class="fas fa-users"></i> Add to close friends</li>
-									<li><i class="fas fa-plus"></i> Add to group</li>
-									<li><i class="fas fa-ban"></i> Block</li>
-								</ul>
-							</div>
-						</div>
-						<div class="card-body msg_card_body">
-<video id="selfview" width="200" height="200" autoplay="true"></video>
-  <video id="remoteview" width="200" height="200" autoplay="true"></video>
-		
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+<script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
 
-{{!-- <div id="app">
-  <button class="btn-face m-b-10" style="margin: 30;" onclick="loginWithFacebook()">
-					
-						Facebook
-					</button>
-
-					<button class="btn-google m-b-10" onclick="loginWithGoogle()">
-					
-						Google
-					</button>
-  <span id="myid"> </span>
-  <video id="selfview"></video>
-  <video id="remoteview"></video>
-  <button id="endCall" style="display: none;" onclick="endCurrentCall()">End Call </button>
-  <div id="list">
-    <ul id="users">
-
-    </ul>
-  </div>
-</div> --}}
-
-<script src="https://js.pusher.com/4.1/pusher.min.js"></script>
-<script>
-  /*Vue.config.delimiters = ['${', '}']
-  var app = new Vue({
-  el: '#app',
-  data: {
-    message: 'Hello Vue!'
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<style type="text/css">
+  video {
+    background-color: #ddd;
+    border-radius: 7px;
+    margin: 10px 0px 0px 10px;
+    width: 320px;
+    height: 240px;
   }
-})*/
 
-var callId = "";
-var userId = '{{user_info.uid}}';
+  button {
+    margin: 5px 0px 0px 10px !important;
+    width: 654px;
+  }
+</style>
 
-    var pusher = new Pusher("b38e18d7edf043da795b", {
-      cluster: "ap1",
-      //encrypted: true,
-      authEndpoint: "pusher/auth"
-    });
-    var usersOnline,
-      id,
-      users = [],
-      sessionDesc,
-      currentcaller,
-      room,
-      caller,
-      localUserMedia;
-    const channel = pusher.subscribe("presence-videocall");
+<video id="yourVideo" autoplay="true"></video>
 
-     var setName = function(name, uid) {
-       console.log("setname");
-        $('#peer-name').html(name);
-        callId = uid;
-     };
 
-    channel.bind("pusher:subscription_succeeded", members => {
-      //set the member count
-      usersOnline = members.count;
+<video id="friendsVideo" autoplay="true"></video>
+<br />
 
-      //document.getElementById("myid").innerHTML = ` My caller id is : ` + id;
-      console.log(members);
-      members.each(member => {
-        if (member.id != channel.members.me.id) {
-          users.push(member.id);
+<button onclick="showFriendsFace()" type="button" class="btn btn-primary btn-lg"><span
+    class="glyphicon glyphicon-facetime-video" aria-hidden="true"></span> Call</button>
+
+
+<script type="text/javascript">
+
+  $(document).ready(function() {
+    showMyFace();
+  });
+  var config = {
+
+
+    apiKey: "AIzaSyDdWXsOoKtyndHTJGElfLJvWxTWzFoMZ0Y",
+    authDomain: "webrtc-e263a.firebaseapp.com",
+    databaseURL: "https://webrtc-e263a.firebaseio.com",
+    projectId: "webrtc-e263a",
+    storageBucket: "webrtc-e263a.appspot.com",
+    messagingSenderId: "937625305824",
+    appId: "1:937625305824:web:8854aed95bf3a355fe0685"
+
+
+  };
+  firebase.initializeApp(config);
+  var database = firebase.database().ref();
+  var yourVideo = document.getElementById("yourVideo");
+  var friendsVideo = document.getElementById("friendsVideo");
+  var yourId = Math.floor(Math.random() * 1000000000);
+  var servers = { 'iceServers': [{ 'urls': 'stun:stun.services.mozilla.com' }, { 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'turn:numb.viagenie.ca', 'credential': 'webrtc', 'username': 'websitebeaver@mail.com' }] };
+  var pc = new RTCPeerConnection(servers);
+  pc.onicecandidate = (event => event.candidate ? sendMessage(yourId, JSON.stringify({ 'ice': event.candidate })) : console.log("Sent All Ice"));
+  pc.onaddstream = (event =>  {
+    console.log(event);
+    friendsVideo.srcObject = event.stream
+  });
+  function sendMessage(senderId, data) {
+    var msg = database.push({ sender: senderId, message: data });
+    msg.remove();
+  }
+  function readMessage(data) {
+   console.log("(data.val().message", data.val().message);
+   if (!data.val().message) return;
+    var msg = JSON.parse(data.val().message);
+    
+    var sender = data.val().sender;
+      console.log("sender", sender);
+    if (sender != yourId) {
+      if (msg.ice != undefined) {
+        pc.addIceCandidate(new RTCIceCandidate(msg.ice));
+      }
+      else if (msg.sdp.type == "offer") {
+        var r = confirm("Answer call?");
+        if (r == true) {
+          pc.setRemoteDescription(new RTCSessionDescription(msg.sdp))
+            .then(() => pc.createAnswer())
+            .then(answer => pc.setLocalDescription(answer))
+            .then(() => sendMessage(yourId, JSON.stringify({ 'sdp': pc.localDescription })));
+        } else {
+          alert("Rejected the call");
         }
-      });
-
-      //render();
-    });
-
-    channel.bind("pusher:member_added", member => {
-      users.push(member.id);
-      //render();
-    });
-
-    channel.bind("pusher:member_removed", member => {
-      // for remove member from list:
-      var index = users.indexOf(member.id);
-      users.splice(index, 1);
-      if (member.id == room) {
-        endCall();
       }
-      //render();
-    });
-
-    function render() {
-      var list = "";
-      users.forEach(function(user) {
-        list +=
-          `<li>` +
-          user +
-          ` <input type="button" style="float:right;"  value="Call" onclick="callUser('` +
-          user +
-          `')" id="makeCall" /></li>`;
-      });
-      document.getElementById("users").innerHTML = list;
-    }
-
-    //To iron over browser implementation anomalies like prefixes
-    GetRTCPeerConnection();
-    GetRTCSessionDescription();
-    GetRTCIceCandidate();
-    prepareCaller();
-    function prepareCaller() {
-      //Initializing a peer connection
-      caller = new window.RTCPeerConnection();
-      //Listen for ICE Candidates and send them to remote peers
-      caller.onicecandidate = function(evt) {
-        if (!evt.candidate) return;
-        console.log("onicecandidate called");
-        onIceCandidate(caller, evt);
-      };
-      //onaddstream handler to receive remote feed and show in remoteview video element
-      caller.onaddstream = function(evt) {
-        console.log("onaddstream called");
-        document.getElementById("remoteview").srcObject = evt.stream;
-      };
-    }
-    function getCam() {
-      //Get local audio/video feed and show it in selfview video element
-      return navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-      });
-    }
-
-    function GetRTCIceCandidate() {
-      window.RTCIceCandidate =
-        window.RTCIceCandidate ||
-        window.webkitRTCIceCandidate ||
-        window.mozRTCIceCandidate ||
-        window.msRTCIceCandidate;
-
-      return window.RTCIceCandidate;
-    }
-
-    function GetRTCPeerConnection() {
-      window.RTCPeerConnection =
-        window.RTCPeerConnection ||
-        window.webkitRTCPeerConnection ||
-        window.mozRTCPeerConnection ||
-        window.msRTCPeerConnection;
-      return window.RTCPeerConnection;
-    }
-
-    function GetRTCSessionDescription() {
-      window.RTCSessionDescription =
-        window.RTCSessionDescription ||
-        window.webkitRTCSessionDescription ||
-        window.mozRTCSessionDescription ||
-        window.msRTCSessionDescription;
-      return window.RTCSessionDescription;
-    }
-
-    //Create and send offer to remote peer on button click
-    function callUser(user) {
-      getCam()
-        .then(stream => {
-          document.getElementById("selfview").srcObject = stream;
-          //toggleEndCallButton();
-          caller.addStream(stream);
-          localUserMedia = stream;
-          caller.createOffer().then(function(desc) {
-            caller.setLocalDescription(new RTCSessionDescription(desc));
-            channel.trigger("client-sdp", {
-              sdp: desc,
-              room: callId,
-              from: userId
-            });
-            room = callId;
-          });
-        })
-        .catch(error => {
-          console.log("an error occured", error);
-        });
-    }
-
-    function endCall() {
-      room = undefined;
-      caller.close();
-      for (let track of localUserMedia.getTracks()) {
-        track.stop();
-      }
-      prepareCaller();
-      //toggleEndCallButton();
-    }
-
-    function endCurrentCall() {
-      channel.trigger("client-endcall", {
-        room: room
-      });
-
-      endCall();
-    }
-
-    //Send the ICE Candidate to the remote peer
-    function onIceCandidate(peer, evt) {
-      if (evt.candidate) {
-        channel.trigger("client-candidate", {
-          candidate: evt.candidate,
-          room: room
-        });
+      else if (msg.sdp.type == "answer") {
+        pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
       }
     }
-
-    function toggleEndCallButton() {
-      if (document.getElementById("endCall").style.display == "block") {
-        document.getElementById("endCall").style.display = "none";
-      } else {
-        document.getElementById("endCall").style.display = "block";
-      }
-    }
-
-    //Listening for the candidate message from a peer sent from onicecandidate handler
-    channel.bind("client-candidate", function(msg) {
-      if (msg.room == room) {
-        console.log("candidate received");
-        caller.addIceCandidate(new RTCIceCandidate(msg.candidate));
-      }
-    });
-
-    //Listening for Session Description Protocol message with session details from remote peer
-    channel.bind("client-sdp", function(msg) {
-      if (msg.room == userId) {
-        console.log("sdp received");
-        var answer = confirm(
-          "You have a call from: " + msg.from + "Would you like to answer?"
-        );
-        if (!answer) {
-          return channel.trigger("client-reject", { room: msg.room, rejected: userId });
-        }
-        room = msg.room;
-        getCam()
-          .then(stream => {
-            localUserMedia = stream;
-            //toggleEndCallButton();
-            document.getElementById("selfview").srcObject = stream;
-            caller.addStream(stream);
-            var sessionDesc = new RTCSessionDescription(msg.sdp);
-            caller.setRemoteDescription(sessionDesc);
-            caller.createAnswer().then(function(sdp) {
-              caller.setLocalDescription(new RTCSessionDescription(sdp));
-              channel.trigger("client-answer", {
-                sdp: sdp,
-                room: room
-              });
-            });
-          })
-          .catch(error => {
-            console.log("an error occured", error);
-          });
-      }
-    });
-
-    //Listening for answer to offer sent to remote peer
-    channel.bind("client-answer", function(answer) {
-      if (answer.room == room) {
-        console.log("answer received");
-        caller.setRemoteDescription(new RTCSessionDescription(answer.sdp));
-      }
-    });
-
-    channel.bind("client-reject", function(answer) {
-      if (answer.room == room) {
-        console.log("Call declined");
-        alert("call to " + answer.rejected + "was politely declined");
-        endCall();
-      }
-    });
-
-    channel.bind("client-endcall", function(answer) {
-      if (answer.room == room) {
-        console.log("Call Ended");
-        endCall();
-      }
-    });
-    </script>
+  };
+  database.on('child_added', readMessage);
+  function showMyFace() {
+    console.log("showMyFace");
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+      .then(stream => yourVideo.srcObject = stream)
+      .then(stream => pc.addStream(stream));
+  }
+  function showFriendsFace() {
+    pc.createOffer()
+      .then(offer => pc.setLocalDescription(offer))
+      .then(() => sendMessage(yourId, JSON.stringify({ 'sdp': pc.localDescription })));
+  }
+</script>
