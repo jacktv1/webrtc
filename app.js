@@ -5,7 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var exphbs  = require('express-handlebars');
 var Pusher = require('pusher');
-
+var session = require('express-session');
+var bodyParser = require('body-parser');
+var cookieSession = require('cookie-session')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -13,14 +15,31 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.engine('handlebars', exphbs());
+app.engine('handlebars', exphbs({
+  extname: '.handlebars',
+  helpers: require('./helper/handlebars-helpers') //only need this
+}));
 app.set('view engine', 'handlebars');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// app.use(express.urlencoded({ extended: false }));
+// app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// parse application/x-www-form-urlencoded
+// support parsing of application/json type post data
+app.use(bodyParser.json());
+
+//support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['514B729F-C2CB-4C38-9086-A3E8AA771FC6'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 const pusher = new Pusher({
   appId: '1007519',
@@ -43,6 +62,11 @@ app.post("/pusher/auth", (req, res) => {
 });
 
 app.use('/', indexRouter);
+
+app.get("/post",function(req,res,next){
+  console.log(req.query);
+  res.send("response");
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

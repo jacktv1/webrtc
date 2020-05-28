@@ -1,0 +1,175 @@
+<link rel="stylesheet" href="/style.css">
+<div id="logreg-forms">
+    <form class="form-signin">
+        <h1 class="h3 mb-3 font-weight-normal" style="text-align: center"> Sign in</h1>
+        <div class="social-login">
+            <button class="btn facebook-btn social-btn" type="button" id="btn-login-facebook"><span><i class="fab fa-facebook-f"></i> Sign in
+                    with Facebook</span> </button>
+            <button class="btn google-btn social-btn" type="button" id="btn-login-google"><span><i class="fab fa-google-plus-g"></i> Sign in
+                    with Google+</span> </button>
+        </div>
+        <p style="text-align:center"> OR </p>
+        <input type="email" id="email" class="form-control" placeholder="Email address" required="" autofocus="">
+        <input type="password" id="password" class="form-control" placeholder="Password" required="">
+
+        <button class="btn btn-success btn-block" type="button" id="btn-login"><i class="fas fa-sign-in-alt"></i> Sign in</button>
+        <a href="#" id="forgot_pswd">Forgot password?</a>
+        <hr>
+        <!-- <p>Don't have an account!</p>  -->
+        <button class="btn btn-primary btn-block" type="button" id="btn-signup"><i class="fas fa-user-plus"></i> Sign up
+            New Account</button>
+    </form>
+
+    <form action="/reset/password/" class="form-reset">
+        <input type="email" id="resetEmail" class="form-control" placeholder="Email address" required="" autofocus="">
+        <button class="btn btn-primary btn-block" type="submit">Reset Password</button>
+        <a href="#" id="cancel_reset"><i class="fas fa-angle-left"></i> Back</a>
+    </form>
+
+    <form action="/signup/" class="form-signup">
+        <div class="social-login">
+            <button class="btn facebook-btn social-btn" type="button"><span><i class="fab fa-facebook-f"></i> Sign up
+                    with Facebook</span> </button>
+        </div>
+        <div class="social-login">
+            <button class="btn google-btn social-btn" type="button"><span><i class="fab fa-google-plus-g"></i> Sign up
+                    with Google+</span> </button>
+        </div>
+
+        <p style="text-align:center">OR</p>
+
+        <input type="text" id="user-name" class="form-control" placeholder="Full name" required="" autofocus="">
+        <input type="email" id="user-email" class="form-control" placeholder="Email address" required autofocus="">
+        <input type="password" id="user-pass" class="form-control" placeholder="Password" required autofocus="">
+        <input type="password" id="user-repeatpass" class="form-control" placeholder="Repeat Password" required
+            autofocus="">
+
+        <button class="btn btn-primary btn-block" type="submit"><i class="fas fa-user-plus"></i> Sign Up</button>
+        <a href="#" id="cancel_signup"><i class="fas fa-angle-left"></i> Back</a>
+    </form>
+    <br>
+
+</div>
+<script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
+<script>
+
+    $("#btn-login-google").on('click', function() {
+        loginWithGoogle();
+    });
+
+    $("#btn-login-facebook").on('click', function() {
+        loginWithFacebook();
+    });
+
+    $("#btn-login").on('click', function() {
+        var email = $('#email').val();
+        var password = $('#password').val();
+        loginWithEmailAndPassword(email, password);
+    })
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyDdWXsOoKtyndHTJGElfLJvWxTWzFoMZ0Y",
+        authDomain: "webrtc-e263a.firebaseapp.com",
+        databaseURL: "https://webrtc-e263a.firebaseio.com",
+        projectId: "webrtc-e263a",
+        storageBucket: "webrtc-e263a.appspot.com",
+        messagingSenderId: "937625305824",
+        appId: "1:937625305824:web:8854aed95bf3a355fe0685"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    /*firebase.auth().onAuthStateChanged(user => {
+      
+        if (!user) return;
+        saveSession( {
+            uid: user.uid,
+            name: user.displayName,
+            avatar: user.photoURL
+        })
+    });*/
+
+    function loginWithEmailAndPassword(email, password) {
+        firebase.auth().signInWithEmailAndPassword(email, password).then(function(result) {
+            console.log(result);
+            var user = {
+                uid: result.user.uid,
+                name: result.user.displayName,
+                avatar: result.user.photoURL
+            };
+            saveSession(user);
+        }).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // ...
+        });
+    }
+
+    function loginWithGoogle() {
+        console.log("login");
+        var provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+            'login_hint': 'user@example.com'
+        });
+        firebase.auth().signInWithRedirect(provider).then(function (result) {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            var token = result.credential.accessToken;
+            // The signed-in user info.
+            var user = result.user;
+            // ...
+        }).catch(function (error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // The email of the user's account used.
+            var email = error.email;
+            // The firebase.auth.AuthCredential type that was used.
+            var credential = error.credential;
+            // ...
+
+            console.log(errorMessage);
+            alert(errorMessage);
+        });
+    }
+
+    function loginWithFacebook() {
+        var provider = new firebase.auth.FacebookAuthProvider();
+        firebase.auth().signInWithRedirect(provider).then(function (result) {
+            // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+            var token = result.credential.accessToken;
+            // The signed-in user info.
+            var user = result.user;
+
+            console.log("success", result);
+            // ...
+        }).catch(function (error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // The email of the user's account used.
+            var email = error.email;
+            // The firebase.auth.AuthCredential type that was used.
+            var credential = error.credential;
+            // ...
+
+            var errorMessage = error.message;
+            console.log(errorMessage);
+            alert(errorMessage);
+        });
+    }
+
+    function saveSession(user) {
+        console.log(user);
+        $.post("save-session", { user }, function (data) {
+            console.log(data);
+            if (data.success == true) {
+                window.location.href = "/";
+            } else {
+                alert(data.message)
+            }
+
+        }, "json");
+    }
+</script>

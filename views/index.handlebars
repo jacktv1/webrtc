@@ -1,5 +1,77 @@
-<link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
-<div id="app">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+<link rel="stylesheet" href="/home-style.css">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.js"></script>
+	<div class="container-fluid h-100" id="app">
+			<div class="row justify-content-center h-100">
+				<div class="col-md-4 col-xl-3 chat"><div class="card mb-sm-3 mb-md-0 contacts_card">
+					<div class="card-header">
+						<div class="input-group">
+							<input type="text" placeholder="Search..." name="" class="form-control search">
+							<div class="input-group-prepend">
+								<span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+							</div>
+						</div>
+					</div>
+					<div class="card-body contacts_body">
+						<ul class="contacts">
+              {{#each users}}
+            {{#ifCond this.uid '!=' ../user_info.uid}}
+                <li class="active" onclick="setName('{{this.displayName}}', '{{this.uid}}')">
+                  <div class="d-flex bd-highlight">
+                    <div class="img_cont">
+                      <img src="{{this.photoURL}}" class="rounded-circle user_img">
+                      <span class="online_icon"></span>
+                    </div>
+                    <div class="user_info">
+                      <span>{{ this.displayName }}</span>
+                      <p>{{ this.email }}</p>
+                    </div>
+                  </div>
+                </li>
+              {{/ifCond}}
+            {{/each}}
+						</ul>
+					</div>
+					<div class="card-footer"></div>
+				</div></div>
+				<div class="col-md-8 col-xl-9 chat">
+					<div class="card">
+						<div class="card-header msg_head">
+							<div class="d-flex bd-highlight">
+								<div class="img_cont">
+									<img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+									<span class="online_icon"></span>
+								</div>
+								<div class="user_info">
+									<span id="peer-name"></span>
+									{{!-- <p>1767 Messages</p> --}}
+								</div>
+								<div class="video_cam">
+									<span><i class="fas fa-video" onclick="callUser()"></i></span>
+									<span><i class="fas fa-phone"></i></span>
+								</div>
+							</div>
+							<span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+							<div class="action_menu">
+								<ul>
+									<li><i class="fas fa-user-circle"></i> View profile</li>
+									<li><i class="fas fa-users"></i> Add to close friends</li>
+									<li><i class="fas fa-plus"></i> Add to group</li>
+									<li><i class="fas fa-ban"></i> Block</li>
+								</ul>
+							</div>
+						</div>
+						<div class="card-body msg_card_body">
+<video id="selfview" width="200" height="200"></video>
+  <video id="remoteview" width="200" height="200"></video>
+		
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+{{!-- <div id="app">
   <button class="btn-face m-b-10" style="margin: 30;" onclick="loginWithFacebook()">
 					
 						Facebook
@@ -18,76 +90,20 @@
 
     </ul>
   </div>
-</div>
-<script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
-<script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+</div> --}}
+
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 <script>
-  var firebaseConfig = {
-    apiKey: "AIzaSyDdWXsOoKtyndHTJGElfLJvWxTWzFoMZ0Y",
-    authDomain: "webrtc-e263a.firebaseapp.com",
-    databaseURL: "https://webrtc-e263a.firebaseio.com",
-    projectId: "webrtc-e263a",
-    storageBucket: "webrtc-e263a.appspot.com",
-    messagingSenderId: "937625305824",
-    appId: "1:937625305824:web:8854aed95bf3a355fe0685"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  function loginWithGoogle() {
-    var provider = new firebase.auth.GoogleAuthProvider();
-    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-    provider.setCustomParameters({
-      'login_hint': 'user@example.com'
-    });
-    firebase.auth().signInWithPopup(provider).then(function (result) {
-      // This gives you a Google Access Token. You can use it to access the Google API.
-      var token = result.credential.accessToken;
-      // The signed-in user info.
-      var user = result.user;
-      // ...
-    }).catch(function (error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      // The email of the user's account used.
-      var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
-      var credential = error.credential;
-      // ...
-
-      console.log(errorMessage);
-      alert(errorMessage);
-    });
+  /*Vue.config.delimiters = ['${', '}']
+  var app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue!'
   }
-    
-  function loginWithFacebook() {
-    var provider = new firebase.auth.FacebookAuthProvider();
-    firebase.auth().signInWithRedirect(provider).then(function(result) {
-      // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-      var token = result.credential.accessToken;
-      // The signed-in user info.
-      var user = result.user;
+})*/
 
-      console.log("success", result);
-      // ...
-    }).catch(function(error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      // The email of the user's account used.
-      var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
-      var credential = error.credential;
-      // ...
-
-       var errorMessage = error.message;
-        console.log(errorMessage);
-        alert(errorMessage);
-    });
-  }
-
+var callId = "";
+var userId = '{{user_info.uid}}';
 
     var pusher = new Pusher("b38e18d7edf043da795b", {
       cluster: "ap1",
@@ -104,23 +120,30 @@
       localUserMedia;
     const channel = pusher.subscribe("presence-videocall");
 
+     var setName = function(name, uid) {
+       console.log("setname");
+        $('#peer-name').html(name);
+        callId = uid;
+     };
+
     channel.bind("pusher:subscription_succeeded", members => {
       //set the member count
       usersOnline = members.count;
-      id = channel.members.me.id;
-      document.getElementById("myid").innerHTML = ` My caller id is : ` + id;
+
+      //document.getElementById("myid").innerHTML = ` My caller id is : ` + id;
+      console.log(members);
       members.each(member => {
         if (member.id != channel.members.me.id) {
           users.push(member.id);
         }
       });
 
-      render();
+      //render();
     });
 
     channel.bind("pusher:member_added", member => {
       users.push(member.id);
-      render();
+      //render();
     });
 
     channel.bind("pusher:member_removed", member => {
@@ -130,7 +153,7 @@
       if (member.id == room) {
         endCall();
       }
-      render();
+      //render();
     });
 
     function render() {
@@ -163,11 +186,7 @@
       //onaddstream handler to receive remote feed and show in remoteview video element
       caller.onaddstream = function(evt) {
         console.log("onaddstream called");
-        if (window.URL) {
-          document.getElementById("remoteview").srcObject = evt.stream;
-        } else {
-          document.getElementById("remoteview").srcObject = evt.stream;
-        }
+        document.getElementById("remoteview").srcObject = evt.stream;
       };
     }
     function getCam() {
@@ -210,22 +229,18 @@
     function callUser(user) {
       getCam()
         .then(stream => {
-          if (window.URL) {
-            document.getElementById("selfview").srcObject = stream;
-          } else {
-            document.getElementById("selfview").srcObject = stream;
-          }
-          toggleEndCallButton();
+          document.getElementById("selfview").srcObject = stream;
+          //toggleEndCallButton();
           caller.addStream(stream);
           localUserMedia = stream;
           caller.createOffer().then(function(desc) {
             caller.setLocalDescription(new RTCSessionDescription(desc));
             channel.trigger("client-sdp", {
               sdp: desc,
-              room: user,
-              from: id
+              room: callId,
+              from: userId
             });
-            room = user;
+            room = callId;
           });
         })
         .catch(error => {
@@ -240,7 +255,7 @@
         track.stop();
       }
       prepareCaller();
-      toggleEndCallButton();
+      //toggleEndCallButton();
     }
 
     function endCurrentCall() {
@@ -279,24 +294,20 @@
 
     //Listening for Session Description Protocol message with session details from remote peer
     channel.bind("client-sdp", function(msg) {
-      if (msg.room == id) {
+      if (msg.room == userId) {
         console.log("sdp received");
         var answer = confirm(
           "You have a call from: " + msg.from + "Would you like to answer?"
         );
         if (!answer) {
-          return channel.trigger("client-reject", { room: msg.room, rejected: id });
+          return channel.trigger("client-reject", { room: msg.room, rejected: userId });
         }
         room = msg.room;
         getCam()
           .then(stream => {
             localUserMedia = stream;
-            toggleEndCallButton();
-            if (window.URL) {
-              document.getElementById("selfview").srcObject = stream;
-            } else {
-              document.getElementById("selfview").srcObject = stream;
-            }
+            //toggleEndCallButton();
+            document.getElementById("selfview").srcObject = stream;
             caller.addStream(stream);
             var sessionDesc = new RTCSessionDescription(msg.sdp);
             caller.setRemoteDescription(sessionDesc);
