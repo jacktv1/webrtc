@@ -90,7 +90,7 @@
   database.on('child_added', readMessage);
   function showMyFace() {
     console.log("showMyFace");
-    navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    navigator.mediaDevices.getUserMedia({ audio: false, video: true })
       .then(stream => yourVideo.srcObject = stream)
       .then(stream => pc.addStream(stream));
   }
